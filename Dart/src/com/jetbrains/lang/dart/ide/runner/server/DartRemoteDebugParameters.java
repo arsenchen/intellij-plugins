@@ -9,6 +9,7 @@ public class DartRemoteDebugParameters implements Cloneable {
   @NotNull private String myHost = DEFAULT_DART_DEBUG_HOST;
   private int myPort = DEFAULT_DART_DEBUG_PORT;
   @NotNull private String myDartProjectPath = "";
+  private String myIsolateName = "";
 
   @NotNull
   public String getHost() {
@@ -34,6 +35,14 @@ public class DartRemoteDebugParameters implements Cloneable {
 
   public void setDartProjectPath(@NotNull final String dartProjectPath) {
     myDartProjectPath = dartProjectPath;
+  }
+
+  public String getIsolateName() {
+    return myIsolateName;
+  }
+
+  public void setIsolateName(String isolateName) {
+    myIsolateName = isolateName;
   }
 
   @Override

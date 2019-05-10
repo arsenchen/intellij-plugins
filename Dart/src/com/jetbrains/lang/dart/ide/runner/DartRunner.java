@@ -97,6 +97,7 @@ public class DartRunner extends GenericProgramRunner {
     final ExecutionResult executionResult;
     final String debuggingHost;
     final int observatoryPort;
+    final String debugIsolateName;
 
     if (runConfiguration instanceof DartRunConfigurationBase) {
       contextFileOrDir = ((DartRunConfigurationBase)runConfiguration).getRunnerParameters().getDartFileOrDirectory();
@@ -112,6 +113,7 @@ public class DartRunner extends GenericProgramRunner {
 
       debuggingHost = null;
       observatoryPort = ((DartCommandLineRunningState)state).getObservatoryPort();
+      debugIsolateName = "";
     }
     else if (runConfiguration instanceof DartRemoteDebugConfiguration) {
       final String path = ((DartRemoteDebugConfiguration)runConfiguration).getParameters().getDartProjectPath();
@@ -126,6 +128,7 @@ public class DartRunner extends GenericProgramRunner {
 
       debuggingHost = ((DartRemoteDebugConfiguration)runConfiguration).getParameters().getHost();
       observatoryPort = ((DartRemoteDebugConfiguration)runConfiguration).getParameters().getPort();
+      debugIsolateName = ((DartRemoteDebugConfiguration)runConfiguration).getParameters().getIsolateName();
     }
     else {
       LOG.error("Unexpected run configuration: " + runConfiguration.getClass().getName());
@@ -143,6 +146,7 @@ public class DartRunner extends GenericProgramRunner {
         return new DartVmServiceDebugProcess(session,
                                              StringUtil.notNullize(debuggingHost, "localhost"),
                                              observatoryPort,
+                                             debugIsolateName,
                                              executionResult,
                                              dartUrlResolver,
                                              dasExecutionContextId,

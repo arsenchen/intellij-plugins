@@ -15,7 +15,10 @@ import com.intellij.xdebugger.evaluation.XDebuggerEvaluator;
 import com.intellij.xdebugger.frame.XExecutionStack;
 import com.intellij.xdebugger.frame.XStackFrame;
 import com.jetbrains.lang.dart.DartFileType;
-import com.jetbrains.lang.dart.ide.runner.server.vmService.frame.*;
+import com.jetbrains.lang.dart.ide.runner.server.vmService.frame.DartAsyncMarkerFrame;
+import com.jetbrains.lang.dart.ide.runner.server.vmService.frame.DartVmServiceEvaluator;
+import com.jetbrains.lang.dart.ide.runner.server.vmService.frame.DartVmServiceStackFrame;
+import com.jetbrains.lang.dart.ide.runner.server.vmService.frame.DartVmServiceValue;
 import org.dartlang.vm.service.VmService;
 import org.dartlang.vm.service.consumer.*;
 import org.dartlang.vm.service.element.*;
@@ -59,8 +62,26 @@ public class VmServiceWrapper implements Disposable {
     myRequestsScheduler = new Alarm(Alarm.ThreadToUse.POOLED_THREAD, this);
   }
 
+  //TODO:XXX - Fix Bug: it doesn't disconnect after stop debugging.
+  private void stopXXX() {
+    myIsolatesInfo.getIsolateInfos().forEach((i) -> {
+      myDebugProcess.getSession().getConsoleView()
+        .print("Isolate disconnected: id=" + i.getIsolateId() + ", name=" + i.getIsolateName() + "\n", ConsoleViewContentType.LOG_INFO_OUTPUT);
+
+      Set<String> breakpoints = myBreakpointHandler.getBreakpointsXXX(i.getIsolateId());
+      for (String breakpoint : breakpoints) {
+        myVmService.removeBreakpoint(i.getIsolateId(), breakpoint, VmServiceConsumers.EMPTY_SUCCESS_CONSUMER);
+      }
+      myVmService.resume(i.getIsolateId(), VmServiceConsumers.EMPTY_SUCCESS_CONSUMER);
+    });
+
+    myVmService.disconnect();
+  }
+
   @Override
   public void dispose() {
+    //TODO:XXX - Fix Bug: it doesn't disconnect after stop debugging.
+    stopXXX();
   }
 
   private void addRequest(@NotNull final Runnable runnable) {
@@ -101,7 +122,18 @@ public class VmServiceWrapper implements Disposable {
                   Logging.getLogger().logError("No isolates found after VM start: " + vm.getIsolates().size());
                 }
 
+                //DartRemoteDebugIsolateSelector.selectDebugIsolates(vm.getIsolates());
+
                 for (final IsolateRef isolateRef : vm.getIsolates()) {
+                  //TODO:XXX - Add function: debug special isolate.
+                  if (!myDebugProcess.isMyIsolateForDebug(isolateRef)) {
+                    continue;
+                  }
+                  //if (!DartRemoteDebugIsolateSelector.isDebugIsolate(isolateRef, myDebugProcess)) {
+                  //  System.out.println("Discard debug:" + isolateRef.getName() + ",id=" + isolateRef.getId());
+                  //  continue;
+                  //}
+
                   getIsolate(isolateRef.getId(), new VmServiceConsumers.GetIsolateConsumerWrapper() {
                     @Override
                     public void received(final Isolate isolate) {
@@ -186,6 +218,9 @@ public class VmServiceWrapper implements Disposable {
 
   public void handleIsolate(@NotNull final IsolateRef isolateRef, final boolean isolatePausedStart) {
     // We should auto-resume on a StartPaused event, if we're not remote debugging, and after breakpoints have been set.
+
+    myDebugProcess.getSession().getConsoleView()
+      .print("Isolate connected: id=" + isolateRef.getId() + ", name=" + isolateRef.getName() + "\n", ConsoleViewContentType.LOG_INFO_OUTPUT);
 
     final boolean newIsolate = myIsolatesInfo.addIsolate(isolateRef);
 

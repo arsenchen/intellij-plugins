@@ -42,6 +42,15 @@ public class DartVmServiceListener implements VmServiceListener {
 
   @Override
   public void received(@NotNull final String streamId, @NotNull final Event event) {
+    //TODO:XXX - Add function: debug special isolate.
+    if (event.getIsolate() != null && !myDebugProcess.isMyIsolateForDebug(event.getIsolate())) {
+      return;
+    }
+    //System.out.println("Isolate receive:" + event.getIsolate().getName() + ",id=" + event.getIsolate().getId());
+    //if (!DartRemoteDebugIsolateSelector.isDebugIsolate(event.getIsolate(), myDebugProcess)) {
+    //  return;
+    //}
+
     switch (event.getKind()) {
       case BreakpointAdded:
         // TODO Respond to breakpoints added by the observatory.

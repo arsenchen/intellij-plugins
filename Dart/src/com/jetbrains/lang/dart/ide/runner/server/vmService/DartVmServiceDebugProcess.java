@@ -62,6 +62,7 @@ public class DartVmServiceDebugProcess extends XDebugProcess {
   @NotNull private final DartUrlResolver myDartUrlResolver;
   @NotNull private final String myDebuggingHost;
   private final int myObservatoryPort;
+  private final String myDebugIsolateName;
 
   private boolean myVmConnected = false;
 
@@ -88,6 +89,7 @@ public class DartVmServiceDebugProcess extends XDebugProcess {
   public DartVmServiceDebugProcess(@NotNull final XDebugSession session,
                                    @NotNull final String debuggingHost,
                                    final int observatoryPort,
+                                   final String debugIsolateName,
                                    @Nullable final ExecutionResult executionResult,
                                    @NotNull final DartUrlResolver dartUrlResolver,
                                    @Nullable final String dasExecutionContextId,
@@ -97,6 +99,7 @@ public class DartVmServiceDebugProcess extends XDebugProcess {
     super(session);
     myDebuggingHost = debuggingHost;
     myObservatoryPort = observatoryPort;
+    myDebugIsolateName = debugIsolateName;
     myExecutionResult = executionResult;
     myDartUrlResolver = dartUrlResolver;
     myRemoteDebug = remoteDebug;
@@ -612,5 +615,23 @@ public class DartVmServiceDebugProcess extends XDebugProcess {
     if (uri.startsWith("file:/")) return "file:///" + uri.substring("file:/".length());
     if (uri.startsWith("file:")) return "file:///" + uri.substring("file:".length());
     return uri;
+  }
+
+  //TODO:XXX - Add function: debug special isolate.
+  public boolean isMyIsolateForDebug(@NotNull final IsolateRef isolateRef) {
+    if (!myRemoteDebug) {
+      return true;
+    }
+
+    if (myDebugIsolateName.isEmpty()) {
+      return false;
+    }
+
+    if (!myDebugIsolateName.equalsIgnoreCase("-") &&
+        !isolateRef.getName().contains(myDebugIsolateName)) {
+      return false;
+    }
+
+    return true;
   }
 }

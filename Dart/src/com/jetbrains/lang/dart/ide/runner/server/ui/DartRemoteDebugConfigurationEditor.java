@@ -44,6 +44,7 @@ public class DartRemoteDebugConfigurationEditor extends SettingsEditor<DartRemot
   private JTextField myHostField;
   private PortField myPortField;
   private ComboboxWithBrowseButton myDartProjectCombo;
+  private JTextField myIsolateField;
 
   @Nullable private final DartSdk mySdk;
 
@@ -152,6 +153,7 @@ public class DartRemoteDebugConfigurationEditor extends SettingsEditor<DartRemot
     final DartRemoteDebugParameters params = config.getParameters();
     myHostField.setText(params.getHost());
     myPortField.setNumber(params.getPort());
+    myIsolateField.setText(params.getIsolateName());
     setSelectedProjectPath(params.getDartProjectPath());
     updateVmArgs();
   }
@@ -176,6 +178,7 @@ public class DartRemoteDebugConfigurationEditor extends SettingsEditor<DartRemot
     final DartRemoteDebugParameters params = config.getParameters();
     params.setHost(myHostField.getText().trim());
     params.setPort(myPortField.getNumber());
+    params.setIsolateName(myIsolateField.getText().trim());
 
     final Object selectedItem = myDartProjectCombo.getComboBox().getSelectedItem();
     params.setDartProjectPath(selectedItem instanceof NameAndPath ? ((NameAndPath)selectedItem).myPath : "");

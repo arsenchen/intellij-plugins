@@ -87,6 +87,11 @@ public class DartVmServiceBreakpointHandler extends XBreakpointHandler<XLineBrea
     }
   }
 
+  //TODO:XXX - Fix Bug: it doesn't disconnect after stop debugging.
+  public Set<String> getBreakpointsXXX(String isolateId) {
+    return getIsolateInfo(isolateId).getVmBreakpointsXXX();
+  }
+
   private IsolateBreakpointInfo getIsolateInfo(String isolateId) {
     IsolateBreakpointInfo info = myIsolateInfo.get(isolateId);
     if (info == null) {
@@ -181,5 +186,17 @@ class IsolateBreakpointInfo {
       }
       return vmBreakpoints;
     }
+  }
+
+  //TODO:XXX - Fix Bug: it doesn't disconnect after stop debugging.
+  public Set<String> getVmBreakpointsXXX() {
+    final Set<String> allVmBreakpoints = new HashSet<>();
+    synchronized (myXBreakpointToVmBreakpointIdsMap) {
+      for (Set<String> bps : myXBreakpointToVmBreakpointIdsMap.values()) {
+        allVmBreakpoints.addAll(bps);
+      }
+    }
+    allVmBreakpoints.addAll(myTemporaryVmBreakpointIds);
+    return allVmBreakpoints;
   }
 }
